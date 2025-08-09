@@ -1,0 +1,175 @@
+{
+    "id": "night-train",
+    "title": "The Night Train",
+    "description": "A branching moral story that explores trust, prejudice, and survival",
+    "startNodeId": "intro",
+    "meta": { "bgTheme": "storm", "estimatedMinutes": 7 },
+    "nodes": {
+      "intro": {
+        "id": "intro",
+        "title": "The Night Train",
+        "content": [
+          "The train sways gently as rain lashes the window. The carriage is half-empty and the mood is dull.",
+          "You settle in, but something about tonight feels off."
+        ],
+        "choices": [
+          { "id": "to_d1", "label": "Continue", "next": [{ "condition": "true", "nextId": "d1" }] }
+        ]
+      },
+      "d1": {
+        "id": "d1",
+        "title": "The Passenger Without a Ticket",
+        "content": [
+          "The conductor reaches the man across from you. He fumbles through empty pockets.",
+          "'Please… I lost my wallet. My mother is very sick,' he says. The conductor says: 'No ticket, no ride.'"
+        ],
+        "choices": [
+          {
+            "id": "d1_a_speak",
+            "label": "Speak up for him",
+            "tags": ["Trust", "Empathy"],
+            "set": { "helpedTicketless": true },
+            "next": [{ "condition": "true", "nextId": "d2_with_man" }]
+          },
+          {
+            "id": "d1_b_silent",
+            "label": "Stay silent",
+            "tags": ["SelfPreservation"],
+            "set": { "helpedTicketless": false },
+            "next": [{ "condition": "true", "nextId": "d2_no_man" }]
+          },
+          {
+            "id": "d1_c_pay",
+            "label": "Offer to pay for him",
+            "tags": ["Empathy", "Action"],
+            "set": { "helpedTicketless": true, "paidForTicket": true },
+            "next": [{ "condition": "true", "nextId": "d2_with_man" }]
+          }
+        ]
+      },
+      "d2_with_man": {
+        "id": "d2_with_man",
+        "title": "The Cry in the Night",
+        "content": ["Hours later, you wake to muffled crying. The man you helped murmurs: 'Don't go — it's dangerous.'"],
+        "choices": [
+          {
+            "id": "d2_a_investigate",
+            "label": "Investigate alone",
+            "tags": ["Courage", "Curiosity"],
+            "set": { "investigatedAlone": true },
+            "next": [{ "condition": "true", "nextId": "d3_investigate_find" }]
+          },
+          {
+            "id": "d2_b_tell",
+            "label": "Tell the staff",
+            "tags": ["Authority", "TrustInSystem"],
+            "set": { "toldStaff": true },
+            "next": [{ "condition": "true", "nextId": "d3_staff_response" }]
+          },
+          {
+            "id": "d2_c_ignore",
+            "label": "Ignore it",
+            "tags": ["SelfPreservation"],
+            "set": { "ignoredCry": true },
+            "next": [{ "condition": "true", "nextId": "d3_rumor" }]
+          }
+        ]
+      },
+      "d2_no_man": {
+        "id": "d2_no_man",
+        "title": "The Cry in the Night",
+        "content": ["Hours later, you wake to muffled crying. The conductor walks past muttering: 'Not your problem.'"],
+        "choices": [
+          { "id": "d2a", "label": "Investigate alone", "tags": ["Courage"], "set": { "investigatedAlone": true }, "next": [{ "condition": "true", "nextId": "d3_investigate_find" }] },
+          { "id": "d2b", "label": "Tell the staff", "tags": ["Authority"], "set": { "toldStaff": true }, "next": [{ "condition": "true", "nextId": "d3_staff_response" }] },
+          { "id": "d2c", "label": "Ignore it", "tags": ["SelfPreservation"], "set": { "ignoredCry": true }, "next": [{ "condition": "true", "nextId": "d3_rumor" }] }
+        ]
+      },
+      "d3_investigate_find": {
+        "id": "d3_investigate_find",
+        "title": "A Harassment",
+        "content": ["You find a young woman arguing with a man. She looks terrified. 'He touched me,' she says."],
+        "choices": [
+          { "id": "d3_a_defend", "label": "Defend her publicly", "tags": ["Justice", "Empathy"], "set": { "defendedAccused": false, "defendedWoman": true }, "next": [{ "condition": "true", "nextId": "d4_bag_missing" }] },
+          { "id": "d3_b_neutral", "label": "Stay neutral", "tags": ["Neutrality"], "set": { "neutralAfterHarassment": true }, "next": [{ "condition": "true", "nextId": "d4_bag_missing" }] },
+          { "id": "d3_c_investigate", "label": "Quietly investigate", "tags": ["Strategy"], "set": { "quietInvestigation": true }, "next": [{ "condition": "true", "nextId": "d4_bag_missing" }] }
+        ]
+      },
+      "d3_staff_response": {
+        "id": "d3_staff_response",
+        "title": "Staff Shrugs",
+        "content": ["You tell the staff. They respond slowly and dismiss the woman's concerns."],
+        "choices": [
+          { "id": "d3b_a_empty", "label": "Press staff further", "tags": ["Courage", "Justice"], "set": { "pressedStaff": true }, "next": [{ "condition": "true", "nextId": "d4_bag_missing" }] },
+          { "id": "d3b_b_backoff", "label": "Back off", "tags": ["SelfPreservation"], "set": { "backedOff": true }, "next": [{ "condition": "true", "nextId": "d4_bag_missing" }] }
+        ]
+      },
+      "d3_rumor": {
+        "id": "d3_rumor",
+        "title": "Rumors",
+        "content": ["You ignore it. Later you hear rumors that someone was taken away quietly. No one will tell you details."],
+        "choices": [
+          { "id": "d3r_a_ask", "label": "Ask around quietly", "tags": ["Curiosity"], "set": { "askedAround": true }, "next": [{ "condition": "true", "nextId": "d4_bag_missing" }] },
+          { "id": "d3r_b_ignore", "label": "Let it go", "tags": ["SelfPreservation"], "set": { "letItGo": true }, "next": [{ "condition": "true", "nextId": "d4_bag_missing" }] }
+        ]
+      },
+      "d4_bag_missing": {
+        "id": "d4_bag_missing",
+        "title": "The Bag",
+        "content": ["A shout. A passenger's bag is missing and accusations fly. Tension grows."],
+        "choices": [
+          { "id": "d4_a_defend_accused", "label": "Defend the accused publicly", "tags": ["Justice", "Empathy"], "set": { "publiclyDefended": true }, "next": [{ "condition": "true", "nextId": "d5_inspection" }] },
+          { "id": "d4_b_neutral", "label": "Stay neutral", "tags": ["Neutrality"], "set": { "remainedNeutral": true }, "next": [{ "condition": "true", "nextId": "d5_inspection" }] },
+          { "id": "d4_c_investigate_clue", "label": "Quietly investigate", "tags": ["Strategy"], "set": { "foundClue": true }, "next": [{ "condition": "true", "nextId": "d5_inspection" }] }
+        ]
+      },
+      "d5_inspection": {
+        "id": "d5_inspection",
+        "title": "Security Inspection",
+        "content": ["The train halts; guards board announcing a search for a 'dangerous person'. Anxiety spikes."],
+        "choices": [
+          { "id": "d5_a_hide", "label": "Help them hide", "tags": ["Loyalty", "Risk"], "set": { "helpedHide": true }, "next": [{ "condition": "true", "nextId": "final_clash" }] },
+          { "id": "d5_b_handover", "label": "Hand them over", "tags": ["Authority", "SelfPreservation"], "set": { "handedOver": true }, "next": [{ "condition": "true", "nextId": "final_clash" }] },
+          { "id": "d5_c_stall", "label": "Stall the guards diplomatically", "tags": ["Diplomacy", "Strategy"], "set": { "stalledGuards": true }, "next": [{ "condition": "true", "nextId": "final_clash" }] }
+        ]
+      },
+      "final_clash": {
+        "id": "final_clash",
+        "title": "Final Confrontation",
+        "content": ["The storm cuts power and chaos erupts. The accused and guards clash in the dim light. You must decide."],
+        "choices": [
+          { "id": "final_a_help", "label": "Help the accused escape", "tags": ["Loyalty", "Justice"], "set": { "finalChoice": "protect" }, "next": [{ "condition": "true", "nextId": "ending_protector" }] },
+          { "id": "final_b_support_guards", "label": "Support the guards", "tags": ["Authority", "Safety"], "set": { "finalChoice": "authority" }, "next": [{ "condition": "true", "nextId": "ending_pragmatist" }] },
+          { "id": "final_c_slip_away", "label": "Slip away", "tags": ["SelfPreservation"], "set": { "finalChoice": "slip" }, "next": [{ "condition": "true", "nextId": "ending_questioner" }] }
+        ]
+      }
+    },
+    "endings": {
+      "ending_protector": {
+        "id": "ending_protector",
+        "title": "The Protector",
+        "text": ["You help the accused vanish into the night. You never see them again. Later, you hear conflicting news — maybe they were innocent, maybe not."],
+        "archetype": "Protector",
+        "reflection": "You stand by people when it matters most, even at personal risk. This inspires loyalty — but it can blind you to danger."
+      },
+      "ending_pragmatist": {
+        "id": "ending_pragmatist",
+        "title": "The Pragmatist",
+        "text": ["You support the official version and keep yourself safe. You arrive unscathed but will never know if justice was served."],
+        "archetype": "Pragmatist",
+        "reflection": "You value order and security. You survive storms — but survival sometimes costs the truth."
+      },
+      "ending_questioner": {
+        "id": "ending_questioner",
+        "title": "The Questioner",
+        "text": ["You gather evidence and leave with questions. The truth is in your hands, but so is the risk of acting alone."],
+        "archetype": "Questioner",
+        "reflection": "You balance curiosity with caution. You see all sides — but sometimes that keeps you from choosing a side."
+      }
+    },
+    "archetypes": {
+      "Protector": { "displayName": "The Protector", "description": "Acts to protect others at personal cost.", "priorityTags": ["Empathy", "Loyalty"] },
+      "Pragmatist": { "displayName": "The Pragmatist", "description": "Values safety and order.", "priorityTags": ["SelfPreservation", "Authority"] },
+      "Questioner": { "displayName": "The Questioner", "description": "Weighs options and keeps distance.", "priorityTags": ["Diplomacy", "Strategy"] }
+    }
+  }
