@@ -10,7 +10,11 @@ export function useStoryEngine(story?: Story) {
   const [variables, setVariables] = useState<Record<string, any>>({});
   const [tagCounts, setTagCounts] = useState<Record<string, number>>({});
   const [currentNodeId, setCurrentNodeId] = useState<string>(startNodeId);
-  const [history, setHistory] = useState<Array<{ nodeId: string; choiceId?: string }>>([]);
+
+  // history now stores full state for accurate restoration
+  const [history, setHistory] = useState<
+    Array<{ nodeId: string; choiceId?: string; variables: Record<string, any>; tagCounts: Record<string, number> }>
+  >([]);
 
   useEffect(() => {
     if (!story) return;
@@ -64,6 +68,18 @@ export function useStoryEngine(story?: Story) {
 
   function makeChoice(choice: Choice) {
     if (!story || !node) return;
+
+    // Save current state in history before moving
+    setHistory((h) => [
+      ...h,
+      {
+        nodeId: node.id,
+        choiceId: choice.id,
+        variables: { ...variables },
+        tagCounts: { ...tagCounts }
+      }
+    ]);
+
     const mergedVars = { ...variables, ...(choice.set || {}) };
     if (choice.set) {
       setVariables((prev) => ({ ...prev, ...choice.set }));
@@ -77,15 +93,31 @@ export function useStoryEngine(story?: Story) {
         return clone;
       });
     }
-    setHistory((h) => [...h, { nodeId: node.id, choiceId: choice.id }]);
+
     sendAnalyticsEvent('choice_made', { storyId: story.id, nodeId: node.id, choiceId: choice.id, tags: choice.tags });
+
     const nextEntry = (choice.next || []).find((n) => evalCondition(n.condition, mergedVars));
     const nextId = nextEntry ? nextEntry.nextId : undefined;
     if (!nextId) return;
+
     setTimeout(() => {
       setCurrentNodeId(nextId);
       sendAnalyticsEvent('node_view', { storyId: story.id, nodeId: nextId });
     }, 200);
+  }
+
+  function goBack() {
+    setHistory((prev) => {
+      if (prev.length === 0) return prev;
+      const newHist = [...prev];
+      const lastState = newHist.pop();
+      if (lastState) {
+        setCurrentNodeId(lastState.nodeId);
+        setVariables(lastState.variables);
+        setTagCounts(lastState.tagCounts);
+      }
+      return newHist;
+    });
   }
 
   function reset() {
@@ -112,6 +144,7 @@ export function useStoryEngine(story?: Story) {
     tagCounts,
     history,
     makeChoice,
+    goBack,
     reset,
     computeArchetype,
     getEndingIfExists

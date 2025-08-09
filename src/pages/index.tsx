@@ -42,7 +42,7 @@ export default function Home({ stories }: { stories: Story[] }) {
                 </div>
                 <Link
                   href={`/${s.id}`}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.8)] transition duration-300"
+                  className="ml-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.8)] transition duration-300"
                 >
                   Start
                 </Link>
