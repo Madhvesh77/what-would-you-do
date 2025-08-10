@@ -1,16 +1,17 @@
-import fs from 'fs';
-import path from 'path';
-import Link from 'next/link';
-import React from 'react';
-import { Story } from '../types/story';
+import fs from "fs";
+import path from "path";
+import Link from "next/link";
+import React from "react";
+import { Story } from "../types/story";
+import FuzzyText from "../components/FuzzyText";
 
 export async function getStaticProps() {
-  const storiesDir = path.join(process.cwd(), 'stories');
+  const storiesDir = path.join(process.cwd(), "stories");
   const files = fs.existsSync(storiesDir)
-    ? fs.readdirSync(storiesDir).filter((f) => f.endsWith('.json'))
+    ? fs.readdirSync(storiesDir).filter((f) => f.endsWith(".json"))
     : [];
   const stories: Story[] = files.map((f) => {
-    const raw = fs.readFileSync(path.join(storiesDir, f), 'utf-8');
+    const raw = fs.readFileSync(path.join(storiesDir, f), "utf-8");
     return JSON.parse(raw) as Story;
   });
   return { props: { stories } };
@@ -28,7 +29,15 @@ export default function Home({ stories }: { stories: Story[] }) {
   return (
     <main className="min-h-screen bg-black flex items-center justify-center text-white px-4">
       <div className="text-center space-y-8 max-w-2xl w-full">
-        <h1 className="text-5xl font-bold animate-pulse">What would YOU do?</h1>
+        {/* <h1 className="text-5xl font-bold animate-pulse">What would YOU do?</h1> */}
+        <FuzzyText
+          baseIntensity={0.2}
+          hoverIntensity={0.4}
+          enableHover={true}
+          fontSize="4rem"
+        >
+            What would YOU do?
+        </FuzzyText>
         <p className="text-gray-400">
           Short branching moral stories. Choose wisely.
         </p>

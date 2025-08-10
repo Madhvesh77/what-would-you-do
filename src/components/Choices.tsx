@@ -1,14 +1,24 @@
 import React, { useEffect, useCallback } from 'react';
 import { Choice } from '../types/story';
 import clsx from 'clsx';
+import DynamicText from './DynamicText';
 
-export default function Choices({ choices, onChoose }: { choices: Choice[]; onChoose: (c: Choice) => void }) {
-  const handleKey = useCallback((e: KeyboardEvent) => {
-    const idx = Number(e.key) - 1;
-    if (!Number.isNaN(idx) && idx >= 0 && idx < choices.length) {
-      onChoose(choices[idx]);
-    }
-  }, [choices, onChoose]);
+export default function Choices({
+  choices,
+  onChoose
+}: {
+  choices: Choice[];
+  onChoose: (c: Choice) => void;
+}) {
+  const handleKey = useCallback(
+    (e: KeyboardEvent) => {
+      const idx = Number(e.key) - 1;
+      if (!Number.isNaN(idx) && idx >= 0 && idx < choices.length) {
+        onChoose(choices[idx]);
+      }
+    },
+    [choices, onChoose]
+  );
 
   useEffect(() => {
     window.addEventListener('keydown', handleKey);
@@ -32,7 +42,9 @@ export default function Choices({ choices, onChoose }: { choices: Choice[]; onCh
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-400">{`Option ${i + 1}`}</div>
-              <div className="font-medium mt-1">{c.label}</div>
+              <div className="font-medium mt-1">
+                <DynamicText text={c.label} animation={c.animation} />
+              </div>
             </div>
             {c.tags && (
               <div className="text-xs text-gray-500">{c.tags.join(', ')}</div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Node } from '../types/story';
 import clsx from 'clsx';
+import DynamicText from './DynamicText';
 
 export default function SceneCard({ node }: { node: Node }) {
   if (!node) return null;
@@ -17,9 +18,7 @@ export default function SceneCard({ node }: { node: Node }) {
       )}
       <div className="space-y-4">
         {node.content.map((p, i) => (
-          <p key={i} className="leading-relaxed">
-            {p}
-          </p>
+          <DynamicText text={p.text || p} animation={p.animation} />
         ))}
       </div>
     </div>
