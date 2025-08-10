@@ -1,6 +1,7 @@
 {
     "id": "night-train",
     "title": "The Night Train",
+    "titleAnimation": "fuzzy",
     "description": "A branching moral story that explores trust, prejudice, and survival",
     "startNodeId": "intro",
     "meta": { "bgTheme": "storm", "estimatedMinutes": 7 },

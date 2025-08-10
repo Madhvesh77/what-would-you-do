@@ -27,39 +27,42 @@ function FloatingCard({ children }: { children: React.ReactNode }) {
 
 export default function Home({ stories }: { stories: Story[] }) {
   return (
-    <main className="min-h-screen bg-black flex items-center justify-center text-white px-4">
-      <div className="text-center space-y-8 max-w-2xl w-full">
-        {/* <h1 className="text-5xl font-bold animate-pulse">What would YOU do?</h1> */}
-        <FuzzyText
-          baseIntensity={0.2}
-          hoverIntensity={0.4}
-          enableHover={true}
-          fontSize="4rem"
-        >
-            What would YOU do?
-        </FuzzyText>
-        <p className="text-gray-400">
-          Short branching moral stories. Choose wisely.
-        </p>
-        <div className="space-y-4">
-          {stories.map((s) => (
-            <FloatingCard key={s.id}>
-              <div className="p-4 rounded border border-gray-700 bg-gray-900/80 flex items-center justify-between">
-                <div className="text-left">
-                  <div className="text-lg font-semibold">{s.title}</div>
-                  <div className="text-sm text-gray-500">{s.description}</div>
-                </div>
-                <Link
-                  href={`/${s.id}`}
-                  className="ml-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.8)] transition duration-300"
-                >
-                  Start
-                </Link>
-              </div>
-            </FloatingCard>
-          ))}
-        </div>
-      </div>
-    </main>
+    <main className="min-h-screen bg-black flex items-center justify-center text-white px-3 sm:px-4 py-4 sm:py-12">
+  <div className="text-center space-y-6 sm:space-y-8 max-w-2xl w-full">
+    <FuzzyText
+      baseIntensity={0.2}
+      hoverIntensity={0.4}
+      enableHover={true}
+      fontSize="clamp(1.6rem, 5vw, 4rem)" // Fluid scaling
+      className="leading-tight"
+    >
+      What would YOU do?
+    </FuzzyText>
+
+    <p className="text-gray-400 text-sm sm:text-lg px-2">
+      Short branching moral stories. Choose wisely.
+    </p>
+
+    <div className="space-y-3 sm:space-y-4">
+      {stories.map((s) => (
+        <FloatingCard key={s.id}>
+          <div className="p-3 sm:p-6 rounded-xl border border-gray-700 bg-gradient-to-b from-gray-800 to-gray-900/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="text-left flex-1">
+              <div className="text-base sm:text-xl font-semibold">{s.title}</div>
+              <div className="text-xs sm:text-base text-gray-400">{s.description}</div>
+            </div>
+            <Link
+              href={`/${s.id}`}
+              className="px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-gray-700 to-gray-800 text-gray-100 rounded-lg hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition duration-300"
+            >
+              Start
+            </Link>
+          </div>
+        </FloatingCard>
+      ))}
+    </div>
+  </div>
+</main>
+
   );
 }

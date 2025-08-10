@@ -1,7 +1,7 @@
-import React from 'react';
-import { Node } from '../types/story';
-import clsx from 'clsx';
-import DynamicText from './DynamicText';
+import React from "react";
+import { Node } from "../types/story";
+import clsx from "clsx";
+import DynamicText from "./DynamicText";
 
 export default function SceneCard({ node }: { node: Node }) {
   if (!node) return null;
@@ -9,17 +9,20 @@ export default function SceneCard({ node }: { node: Node }) {
   return (
     <div
       className={clsx(
-        'max-w-3xl mx-auto p-8 rounded-2xl shadow-lg bg-gray-900 text-gray-100',
-        'transition-transform duration-300 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'
+        "max-w-3xl mx-auto p-4 sm:p-8 rounded-xl shadow-lg break-words",
+        "bg-gradient-to-b from-gray-800 to-gray-900 text-gray-100"
       )}
     >
       {node.title && (
-        <h2 className="text-2xl font-bold mb-4">{node.title}</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4">{node.title}</h2>
       )}
       <div className="space-y-4">
-        {node.content.map((p, i) => (
-          <DynamicText text={p.text || p} animation={p.animation} />
-        ))}
+        {node.content.map((p, i) => {
+          const text = typeof p === "string" ? p : p.text;
+          const animation = typeof p === "string" ? undefined : p.animation;
+
+          return <DynamicText key={i} text={text} animation={animation} />;
+        })}
       </div>
     </div>
   );
