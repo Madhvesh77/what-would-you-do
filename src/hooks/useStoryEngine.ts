@@ -1,3 +1,4 @@
+// src/hooks/useStoryEngine.ts
 import { useEffect, useMemo, useState } from 'react';
 import { Story, Node, Choice } from '../types/story';
 import { evalCondition } from '../utils/conditionEvaluator';
@@ -6,35 +7,61 @@ import { sendAnalyticsEvent } from '../utils/analytics';
 const STORAGE_PREFIX = 'dilemmastories_progress_';
 
 export function useStoryEngine(story?: Story) {
-  const startNodeId = story?.startNodeId || '';
   const [variables, setVariables] = useState<Record<string, any>>({});
   const [tagCounts, setTagCounts] = useState<Record<string, number>>({});
-  const [currentNodeId, setCurrentNodeId] = useState<string>(startNodeId);
-
-  // history now stores full state for accurate restoration
+  const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [history, setHistory] = useState<
     Array<{ nodeId: string; choiceId?: string; variables: Record<string, any>; tagCounts: Record<string, number> }>
   >([]);
+  const [restoredDebugInfo, setRestoredDebugInfo] = useState<any>(null); // optional debug
 
+  // Load initial state once story is available
   useEffect(() => {
     if (!story) return;
+    const startNodeId = story.startNodeId;
+
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_PREFIX + story.id) : null;
       if (raw) {
         const parsed = JSON.parse(raw);
+        // determine what node the saved state wants to restore to
+        let restoredNodeId: string = parsed.currentNodeId || startNodeId;
+
+        // detect if restoredNodeId refers to an ending
+        const nodeObj = story.nodes?.[restoredNodeId];
+        const directEndingMatch = Boolean(story.endings && story.endings[restoredNodeId]);
+        const nodeMarkedEnding = Boolean(nodeObj?.isEnding && nodeObj?.endingId);
+
+        const isEndingNode = directEndingMatch || nodeMarkedEnding;
+
+        // DEBUG: store info so devs can inspect in console if needed
+        setRestoredDebugInfo({
+          restoredNodeId,
+          isEndingNode,
+          parsedHistoryLength: (parsed.history || []).length,
+          parsedVariables: parsed.variables,
+        });
+        // If the restored node is an ending, ignore it (start fresh at startNodeId).
+        const safeNodeId = isEndingNode ? startNodeId : restoredNodeId;
+
         setVariables(parsed.variables || {});
         setTagCounts(parsed.tagCounts || {});
-        setCurrentNodeId(parsed.currentNodeId || startNodeId);
+        setCurrentNodeId(safeNodeId);
         setHistory(parsed.history || []);
       } else {
         setCurrentNodeId(startNodeId);
       }
-    } catch {}
-    sendAnalyticsEvent('story_view', { storyId: story.id });
-  }, [story, startNodeId]);
+    } catch (err) {
+      // fallback to start node on parse errors
+      setCurrentNodeId(startNodeId);
+    }
 
+    sendAnalyticsEvent('story_view', { storyId: story.id });
+  }, [story]);
+
+  // Persist progress
   useEffect(() => {
-    if (!story || typeof window === 'undefined') return;
+    if (!story || typeof window === 'undefined' || !currentNodeId) return;
     try {
       const payload = { variables, tagCounts, currentNodeId, history };
       localStorage.setItem(STORAGE_PREFIX + story.id, JSON.stringify(payload));
@@ -42,7 +69,7 @@ export function useStoryEngine(story?: Story) {
   }, [variables, tagCounts, currentNodeId, history, story]);
 
   const node: Node | undefined = useMemo(() => {
-    if (!story) return undefined;
+    if (!story || !currentNodeId) return undefined;
     return story.nodes[currentNodeId];
   }, [story, currentNodeId]);
 
@@ -56,7 +83,7 @@ export function useStoryEngine(story?: Story) {
       const arche = story.archetypes[id];
       let score = 0;
       (arche.priorityTags || []).forEach((t) => {
-        score += (totals[t] || 0) * 1;
+        score += (totals[t] || 0);
       });
       if (score > bestScore) {
         bestScore = score;
@@ -69,27 +96,17 @@ export function useStoryEngine(story?: Story) {
   function makeChoice(choice: Choice) {
     if (!story || !node) return;
 
-    // Save current state in history before moving
     setHistory((h) => [
       ...h,
-      {
-        nodeId: node.id,
-        choiceId: choice.id,
-        variables: { ...variables },
-        tagCounts: { ...tagCounts }
-      }
+      { nodeId: node.id, choiceId: choice.id, variables: { ...variables }, tagCounts: { ...tagCounts } }
     ]);
 
     const mergedVars = { ...variables, ...(choice.set || {}) };
-    if (choice.set) {
-      setVariables((prev) => ({ ...prev, ...choice.set }));
-    }
-    if (choice.tags && choice.tags.length > 0) {
+    if (choice.set) setVariables((prev) => ({ ...prev, ...choice.set }));
+    if (choice.tags?.length) {
       setTagCounts((prev) => {
         const clone = { ...prev };
-        choice.tags!.forEach((t) => {
-          clone[t] = (clone[t] || 0) + 1;
-        });
+        choice.tags!.forEach((t) => { clone[t] = (clone[t] || 0) + 1; });
         return clone;
       });
     }
@@ -97,7 +114,7 @@ export function useStoryEngine(story?: Story) {
     sendAnalyticsEvent('choice_made', { storyId: story.id, nodeId: node.id, choiceId: choice.id, tags: choice.tags });
 
     const nextEntry = (choice.next || []).find((n) => evalCondition(n.condition, mergedVars));
-    const nextId = nextEntry ? nextEntry.nextId : undefined;
+    const nextId = nextEntry?.nextId;
     if (!nextId) return;
 
     setTimeout(() => {
@@ -108,7 +125,7 @@ export function useStoryEngine(story?: Story) {
 
   function goBack() {
     setHistory((prev) => {
-      if (prev.length === 0) return prev;
+      if (!prev.length) return prev;
       const newHist = [...prev];
       const lastState = newHist.pop();
       if (lastState) {
@@ -124,16 +141,31 @@ export function useStoryEngine(story?: Story) {
     if (!story) return;
     setVariables({});
     setTagCounts({});
-    setCurrentNodeId(startNodeId);
+    setCurrentNodeId(story.startNodeId);
     setHistory([]);
     if (typeof window !== 'undefined') localStorage.removeItem(STORAGE_PREFIX + story.id);
   }
 
   function getEndingIfExists() {
-    if (!story) return undefined;
-    if (story.endings && story.endings[currentNodeId]) return story.endings[currentNodeId];
+    if (!story || !currentNodeId) return undefined;
+
+    // never consider the start node as an ending
+    if (currentNodeId === story.startNodeId) return undefined;
+
+    // require that user actually progressed (history length > 0)
+    if (history.length === 0) return undefined;
+
     const nodeObj = story.nodes[currentNodeId];
-    if (nodeObj && nodeObj.isEnding && nodeObj.endingId) return story.endings[nodeObj.endingId];
+    if (nodeObj?.isEnding && nodeObj.endingId) {
+      return story.endings[nodeObj.endingId];
+    }
+
+    // fallback: allow direct mapping from nodeId -> ending entry,
+    // but only if we're past the start node and we have history.
+    if (story.endings && story.endings[currentNodeId]) {
+      return story.endings[currentNodeId];
+    }
+
     return undefined;
   }
 
@@ -147,6 +179,9 @@ export function useStoryEngine(story?: Story) {
     goBack,
     reset,
     computeArchetype,
-    getEndingIfExists
+    getEndingIfExists,
+    isLoading: !node && !!story,
+    // optional debug to inspect restored data quickly in the console
+    restoredDebugInfo
   } as const;
 }

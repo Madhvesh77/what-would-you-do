@@ -7,7 +7,7 @@ import SceneCard from "../../components/SceneCard";
 import Choices from "../../components/Choices";
 import EndingView from "../../components/EndingView";
 import { useStoryEngine } from "../../hooks/useStoryEngine";
-import FuzzyText from "../../components/FuzzyText"; // ✅ new
+import FuzzyText from "../../components/FuzzyText";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const storiesDir = path.join(process.cwd(), "stories");
@@ -37,18 +37,26 @@ export default function StoryPage({ story }: { story: Story }) {
   const ending = engine.getEndingIfExists();
   const arche = engine.computeArchetype();
 
-  if (!node) return <div>Loading...</div>;
-
-  if (ending) {
+  // Show ending only if we're not at the start node
+  if (
+    ending &&
+    engine.history.length > 0 &&
+    engine.currentNodeId !== story.startNodeId
+  ) {
     return (
       <main className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8 relative">
         <EndingView
           ending={ending}
-          archetypeName={arche.archetypeName}
+          archetype={story.archetypes[arche.id]}
           onReplay={() => engine.reset()}
         />
       </main>
     );
+  }
+
+  // Render normal scene
+  if (!node) {
+    return <p className="text-center text-gray-400">Story node not found.</p>;
   }
 
   return (
@@ -68,10 +76,10 @@ export default function StoryPage({ story }: { story: Story }) {
           </h1>
         )}
       </div>
-        <div className="pb-8">
-      <SceneCard node={node} />
-      <Choices choices={node.choices} onChoose={(c) => engine.makeChoice(c)} />
-        </div>
+      <div className="pb-8">
+        <SceneCard node={node} />
+        <Choices choices={node.choices} onChoose={(c) => engine.makeChoice(c)} />
+      </div>
       {engine.history.length > 0 && (
         <button
           onClick={() => engine.goBack?.()}

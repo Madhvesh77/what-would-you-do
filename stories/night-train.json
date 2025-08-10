@@ -147,6 +147,7 @@
     },
     "endings": {
       "ending_protector": {
+        "animationType": "confetti",
         "id": "ending_protector",
         "title": "The Protector",
         "text": ["You help the accused vanish into the night. You never see them again. Later, you hear conflicting news — maybe they were innocent, maybe not."],
@@ -154,6 +155,7 @@
         "reflection": "You stand by people when it matters most, even at personal risk. This inspires loyalty — but it can blind you to danger."
       },
       "ending_pragmatist": {
+        "animationType": "confetti",
         "id": "ending_pragmatist",
         "title": "The Pragmatist",
         "text": ["You support the official version and keep yourself safe. You arrive unscathed but will never know if justice was served."],
@@ -161,6 +163,7 @@
         "reflection": "You value order and security. You survive storms — but survival sometimes costs the truth."
       },
       "ending_questioner": {
+        "animationType": "confetti",
         "id": "ending_questioner",
         "title": "The Questioner",
         "text": ["You gather evidence and leave with questions. The truth is in your hands, but so is the risk of acting alone."],

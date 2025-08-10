@@ -33,10 +33,11 @@ export interface Node {
 export interface Ending {
   id: string;
   title: string;
-  titleAnimation?: string; // optional animation for ending title
-  text: ContentBlock[]; // ending text can also be animated
+  text: (string | { text: string; animation?: string })[];
   archetype: string;
   reflection: string;
+  animationType?: "confetti" | "crying" | "neutral";
+  titleAnimation?: string;
 }
 
 export interface Archetype {
